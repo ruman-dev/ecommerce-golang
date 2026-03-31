@@ -13,7 +13,6 @@ func Index() {
 	initRoute := gin.Default()
 
 	router := initRoute.Group("/api/v1")
-
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status": "Server Running",

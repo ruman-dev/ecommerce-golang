@@ -2,18 +2,14 @@ package auth
 
 import (
 	"net/http"
-	"time"
 
+	"example.com/ecommerce/internal/modules/product"
 	"example.com/ecommerce/models"
 	"example.com/ecommerce/response"
 	"example.com/ecommerce/validation"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
-
-var users []models.User
-var jwtSecret = []byte("your-secret-key") // In production, use environment variable
 
 func Register(c *gin.Context) {
 	var req models.RegisterRequest
@@ -35,61 +31,50 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	// Create user
-	user := models.User{
-		ID:       len(users) + 1,
-		Name:     req.Name,
-		Age:      req.Age,
-		Email:    req.Email,
-		Password: string(hashedPassword),
+	id, err := CreateUser(&req, string(hashedPassword))
+	if err != nil {
+		response.SendError(c, http.StatusInternalServerError, []string{err.Error()})
+		return
 	}
 
-	users = append(users, user)
+	user := models.User{
+		ID:    id,
+		Name:  req.Name,
+		Age:   req.Age,
+		Email: req.Email,
+	}
 
 	response.SendSuccess(c, http.StatusCreated, "user registered successfully", user)
 }
 
 func Login(c *gin.Context) {
 	var req models.LoginRequest
+
+	// Validate request body
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.SendError(c, http.StatusBadRequest, []string{"invalid request format"})
 		return
 	}
 
-	// Find user
-	var user models.User
-	found := false
-	for _, u := range users {
-		if u.Email == req.Email {
-			user = u
-			found = true
-			break
-		}
-	}
-
-	if !found {
-		response.SendError(c, http.StatusUnauthorized, []string{"invalid credentials"})
+	// Validate email and password format
+	if errors := product.ValidateLogin(req); len(errors) > 0 {
+		response.SendError(c, http.StatusBadRequest, errors)
 		return
 	}
 
-	// Check password
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		response.SendError(c, http.StatusUnauthorized, []string{"invalid credentials"})
-		return
-	}
-
-	// Generate JWT
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": user.ID,
-		"email":   user.Email,
-		"exp":     time.Now().Add(time.Hour * 24).Unix(),
-	})
-
-	tokenString, err := token.SignedString(jwtSecret)
+	// Authenticate user
+	user, token, err := LoginUser(req.Email, req.Password)
 	if err != nil {
-		response.SendError(c, http.StatusInternalServerError, []string{"failed to generate token"})
+		response.SendError(c, http.StatusUnauthorized, []string{err.Error()})
 		return
 	}
 
-	response.SendSuccess(c, http.StatusOK, "Login successful", gin.H{"token": tokenString})
+	// Remove password from response
+	user.Password = ""
+
+	// Send success response
+	response.SendSuccess(c, http.StatusOK, "login successful", models.LoginResponse{
+		Token: token,
+		User:  *user,
+	})
 }

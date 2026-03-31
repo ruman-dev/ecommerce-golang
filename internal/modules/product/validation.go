@@ -1,6 +1,11 @@
 package product
 
-import "example.com/ecommerce/models"
+import (
+	"regexp"
+	"strings"
+
+	"example.com/ecommerce/models"
+)
 
 func ValidateCreateProduct(p models.Product) []string {
 	var errors []string
@@ -22,4 +27,30 @@ func ValidateCreateProduct(p models.Product) []string {
 	}
 
 	return errors
+}
+func ValidateLogin(req models.LoginRequest) []string {
+	var errors []string
+
+	// Validate email
+	if req.Email == "" {
+		errors = append(errors, "email is required")
+	} else if !isValidEmail(req.Email) {
+		errors = append(errors, "invalid email format")
+	}
+
+	// Validate password
+	if req.Password == "" {
+		errors = append(errors, "password is required")
+	} else if len(req.Password) < 6 {
+		errors = append(errors, "password must be at least 6 characters")
+	}
+
+	return errors
+}
+func isValidEmail(email string) bool {
+	email = strings.TrimSpace(email)
+	// Basic email validation
+	regex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+	match, _ := regexp.MatchString(regex, email)
+	return match
 }
