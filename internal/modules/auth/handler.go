@@ -91,5 +91,5 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	response.SendSuccess(c, http.StatusOK, "login successful", gin.H{"token": tokenString})
+	response.SendSuccess(c, http.StatusOK, "Login successful", gin.H{"token": tokenString})
 }

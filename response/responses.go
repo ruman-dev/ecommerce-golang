@@ -11,7 +11,7 @@ type SuccessResponse struct {
 }
 
 type ErrorResponse struct {
-	Status string   `json:"status"`
+	Status bool     `json:"status"`
 	Errors []string `json:"errors"`
 }
 
@@ -26,7 +26,7 @@ func SendSuccess(c *gin.Context, statusCode int, message string, data interface{
 
 func SendError(c *gin.Context, statusCode int, errors []string) {
 	response := ErrorResponse{
-		Status: "error",
+		Status: false,
 		Errors: errors,
 	}
 	c.IndentedJSON(statusCode, response)

@@ -3,6 +3,7 @@ package router
 import (
 	"net/http"
 
+	"example.com/ecommerce/internal/middlewares"
 	"example.com/ecommerce/internal/modules/auth"
 	"example.com/ecommerce/internal/modules/product"
 	"github.com/gin-gonic/gin"
@@ -23,11 +24,13 @@ func Index() {
 	router.POST("/register", auth.Register)
 	router.POST("/login", auth.Login)
 
-	// authorizedRoute := router.Group("", middlewares.AuthRequired())
-	// {
-	router.POST("/create-product", product.CreateProduct)
-	router.GET("/products", product.GetProducts)
-	// }
+	authorizedRoute := router.Group("", middlewares.AuthRequired())
+	{
+		authorizedRoute.POST("/create-product", product.CreateProduct)
+		authorizedRoute.GET("/products", product.GetProducts)
+		authorizedRoute.GET("/product/:id", product.GetProductByID)
+		authorizedRoute.DELETE("/product/:id", product.DeleteProduct)
+	}
 
 	initRoute.Run(":8080")
 }
