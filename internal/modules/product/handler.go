@@ -2,7 +2,6 @@ package product
 
 import (
 	"net/http"
-	"strconv"
 	"time"
 
 	"example.com/ecommerce/models"
@@ -63,7 +62,7 @@ func GetProducts(c *gin.Context) {
 		return
 	}
 
-	if len(products) <= 0 {
+	if products == nil {
 		response.SendError(c, http.StatusNotFound, []string{"No products found"})
 		return
 	}
@@ -74,40 +73,28 @@ func GetProducts(c *gin.Context) {
 func GetProductByID(c *gin.Context) {
 	id := c.Param("id")
 
-	pId, err := strconv.Atoi(id)
-
+	product, err := GetProductByIdDB(id)
 	if err != nil {
-		response.SendError(c, http.StatusBadRequest, []string{"Invalid ID Format"})
+		response.SendError(c, http.StatusInternalServerError, []string{err.Error()})
 		return
 	}
 
-	for _, product := range products {
-		if product.ID == pId {
-			response.SendSuccess(c, http.StatusOK, "Product Returned Successfully", product)
-			return
-		}
+	// ✅ Handle not found
+	if product == nil {
+		response.SendError(c, http.StatusNotFound, []string{"Product not found"})
+		return
 	}
 
-	response.SendError(c, http.StatusNotFound, []string{"Product Not Found"})
-
+	response.SendSuccess(c, http.StatusOK, "Product fetched successfully", product)
 }
 
 func DeleteProduct(c *gin.Context) {
 	id := c.Param("id")
 
-	pId, err := strconv.Atoi(id)
-
+	_, err := DeleteProductDB(id)
 	if err != nil {
-		response.SendError(c, http.StatusBadRequest, []string{"Invalid ID Format"})
+		response.SendError(c, http.StatusNotFound, []string{err.Error()})
 		return
 	}
-
-	for i, product := range products {
-		if product.ID == pId {
-			products = append(products[:i], products[i+1:]...)
-			response.SendSuccess(c, http.StatusOK, "Product Deleted Successfully", product)
-			return
-		}
-	}
-	response.SendError(c, http.StatusNotFound, []string{"Product Not Found"})
+	response.SendSuccess(c, http.StatusOK, "Product deleted successfully", []string{})
 }
