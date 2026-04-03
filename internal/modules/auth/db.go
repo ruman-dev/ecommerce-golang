@@ -3,6 +3,7 @@ package auth
 import (
 	"database/sql"
 	"errors"
+	"os"
 	"time"
 
 	"example.com/ecommerce/internal/config"
@@ -94,7 +95,7 @@ func GenerateJWT(user *models.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	// Sign token with secret key
-	jwtSecret := []byte("JWT_SECRET") // Make sure to load from config
+	jwtSecret := []byte(os.Getenv("JWT_SECRET"))
 	tokenString, err := token.SignedString(jwtSecret)
 	if err != nil {
 		return "", err
@@ -105,7 +106,7 @@ func GenerateJWT(user *models.User) (string, error) {
 
 // Verify and parse JWT token
 func VerifyJWT(tokenString string) (*jwt.Token, error) {
-	jwtSecret := []byte("JWT_SECRET")
+	jwtSecret := []byte(os.Getenv("JWT_SECRET"))
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Validate signing method

@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"net/http"
+	"os"
 	"strings"
 
 	"example.com/ecommerce/response"
@@ -9,7 +10,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtSecret = []byte("JWT_SECRET") // Should match the one in auth handler
+var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 
 func AuthRequired() gin.HandlerFunc {
 	return func(c *gin.Context) {
