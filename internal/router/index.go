@@ -19,10 +19,11 @@ func Index() {
 		})
 	})
 
-	// Public routes
+	// Public Routes
 	router.POST("/register", auth.Register)
 	router.POST("/login", auth.Login)
 
+	//Protected Routes
 	authorizedRoute := router.Group("", middlewares.AuthRequired())
 	{
 		authorizedRoute.POST("/create-product", product.CreateProduct)
