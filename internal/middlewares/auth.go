@@ -9,7 +9,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtSecret = []byte("your-secret-key") // Should match the one in auth handler
+var jwtSecret = []byte("JWT_SECRET") // Should match the one in auth handler
 
 func AuthRequired() gin.HandlerFunc {
 	return func(c *gin.Context) {

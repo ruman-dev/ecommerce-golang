@@ -10,15 +10,15 @@ import (
 func ValidateCreateProduct(p models.Product) []string {
 	var errors []string
 
-	if p.Title == "" {
-		errors = append(errors, "title is required")
+	if p.Name == "" {
+		errors = append(errors, "name is required")
 	}
 
 	if p.Description == "" {
 		errors = append(errors, "description is required")
 	}
 
-	if p.Amount <= 0 {
+	if p.Price <= 0 {
 		errors = append(errors, "amount must be greater than 0")
 	}
 

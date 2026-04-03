@@ -1,9 +1,12 @@
 package models
 
+import "time"
+
 type Product struct {
-	ID          int     `json:"id"`
-	Title       string  `json:"title"`
-	Description string  `json:"description"`
-	Amount      float64 `json:"amount"`
-	Quantity    int     `json:"quantity"`
+	ID          int       `db:"id" json:"id"`
+	Name        string    `db:"name" json:"name"`
+	Price       float64   `db:"price" json:"price"`
+	Quantity    int       `db:"quantity" json:"quantity"`
+	Description string    `db:"description" json:"description"`
+	Created_At  time.Time `db:"created_at" json:"created_at"`
 }
